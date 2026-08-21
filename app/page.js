@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   Scale, Shield, Lock, User, Users, Server, Crown, Gift, CreditCard, Coins,
   Ticket, FileText, Database, AlertTriangle, Info, CheckCircle, Ban, Calendar,
@@ -248,6 +248,9 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const [lang, setLang] = useState("de");
 
+  const desktopNavRef = useRef(null);
+  const activeTocItemRef = useRef(null);
+
   const t = (de, en) => (lang === "de" ? de : en);
   const L = (arr) => arr.map(([de, en]) => t(de, en));
 
@@ -284,6 +287,23 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
+    if (activeTocItemRef.current && desktopNavRef.current) {
+      const item = activeTocItemRef.current;
+      const container = desktopNavRef.current;
+
+      const itemRect = item.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      if (itemRect.top < containerRect.top || itemRect.bottom > containerRect.bottom) {
+        container.scrollTo({
+          top: item.offsetTop - container.clientHeight / 2 + item.clientHeight / 2,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [activeSection]);
+
+  useEffect(() => {
     if (isTocOpen) {
       document.body.style.overflow = "hidden";
       const handleEsc = (e) => {
@@ -313,7 +333,7 @@ export default function Page() {
   const scrollbarHideClasses = "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]";
 
   return (
-    <div className="min-h-screen bg-[#0a0b0e] text-slate-300 font-sans selection:bg-blue-500/30 selection:text-white">
+    <div className="min-h-screen bg-[#07090D] text-[#A5B0C2] font-sans selection:bg-[rgba(37,131,255,0.3)] selection:text-[#F5F7FA]">
       
       {isTocOpen && (
         <div 
@@ -327,42 +347,42 @@ export default function Page() {
         role="dialog"
         aria-modal="true"
         aria-label="Inhaltsverzeichnis"
-        className={`fixed top-0 left-0 h-full w-[90vw] max-w-[340px] bg-[#0d0f13] border-r border-[#1e2028] z-50 transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col shadow-2xl ${isTocOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 h-full w-[90vw] max-w-[340px] bg-[#0C111A] border-r border-[#202938] z-50 transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col shadow-2xl ${isTocOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
-        <div className="flex items-center justify-between p-5 border-b border-[#1e2028]">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Menu size={20} className="text-blue-500" />
+        <div className="flex items-center justify-between p-5 border-b border-[#202938]">
+          <h3 className="text-lg font-bold text-[#F5F7FA] flex items-center gap-2">
+            <Menu size={20} className="text-[#2583FF]" />
             {t("Inhaltsverzeichnis", "Table of Contents")}
           </h3>
           <div className="flex items-center gap-2">
-            <button onClick={() => setLang(lang === "de" ? "en" : "de")} className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-md border border-[#1e2028]">
-              <Languages size={14} className="text-blue-500" />
+            <button onClick={() => setLang(lang === "de" ? "en" : "de")} className="flex items-center gap-1 text-xs text-[#A5B0C2] hover:text-[#F5F7FA] transition-colors px-2 py-1 rounded-md border border-[#202938]">
+              <Languages size={14} className="text-[#2583FF]" />
               {lang === "de" ? "EN" : "DE"}
             </button>
-            <button onClick={() => setIsTocOpen(false)} className="text-slate-400 hover:text-white transition-colors p-2" aria-label="Inhaltsverzeichnis schließen">
+            <button onClick={() => setIsTocOpen(false)} className="text-[#69758A] hover:text-[#F5F7FA] transition-colors p-2" aria-label="Inhaltsverzeichnis schließen">
               <X size={22} />
             </button>
           </div>
         </div>
-        <div className="p-4 border-b border-[#1e2028]">
+        <div className="p-4 border-b border-[#202938]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#69758A]" />
             <input
               type="text"
               placeholder={t("Abschnitt suchen...", "Search section...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#0a0b0e] border border-[#1e2028] rounded-lg pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all"
+              className="w-full bg-[#0A0E15] border border-[#202938] rounded-lg pl-10 pr-4 py-2.5 text-sm text-[#F5F7FA] placeholder:text-[#69758A] focus:outline-none focus:border-[#2583FF]/50 focus:ring-1 focus:ring-[#2583FF]/20 transition-all"
             />
           </div>
         </div>
         <nav className={`p-3 overflow-y-auto flex-1 ${scrollbarHideClasses}`}>
           {filteredTocCategories.length === 0 ? (
-            <p className="text-slate-500 text-sm text-center py-6">{t("Keine Ergebnisse.", "No results.")}</p>
+            <p className="text-[#69758A] text-sm text-center py-6">{t("Keine Ergebnisse.", "No results.")}</p>
           ) : (
             filteredTocCategories.map((category) => (
               <div key={category.title_de} className="mb-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 px-3 mb-2">{t(category.title_de, category.title_en)}</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#69758A] px-3 mb-2">{t(category.title_de, category.title_en)}</h4>
                 <ul className="space-y-0.5">
                   {category.items.map((item) => (
                     <li key={item.id}>
@@ -371,11 +391,11 @@ export default function Page() {
                         onClick={(e) => handleTocClick(e, item.id)}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                           activeSection === item.id
-                            ? "bg-blue-500/10 text-blue-400 font-medium"
-                            : "text-slate-400 hover:text-white hover:bg-white/5"
+                            ? "bg-[rgba(37,131,255,0.10)] text-[#F5F7FA] font-medium"
+                            : "text-[#A5B0C2] hover:text-[#F5F7FA] hover:bg-[#151C28]"
                         }`}
                       >
-                        <span className={`text-xs font-mono ${activeSection === item.id ? "text-blue-500" : "text-slate-600"}`}>{item.num}</span>
+                        <span className={`text-xs font-mono ${activeSection === item.id ? "text-[#2583FF]" : "text-[#69758A]"}`}>{item.num}</span>
                         <span className="whitespace-normal break-words">{t(item.title_de, item.title_en)}</span>
                       </a>
                     </li>
@@ -387,31 +407,32 @@ export default function Page() {
         </nav>
       </div>
 
-      <header className="relative border-b border-[#1e2028] w-full overflow-hidden bg-gradient-to-b from-[#101827] via-[#0b111b] to-[#080a0e]">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-        
+      <header 
+        className="relative border-b border-[#202938] w-full overflow-hidden"
+        style={{ background: "radial-gradient(circle at 50% 0%, rgba(37, 131, 255, 0.14), transparent 38%), #07090D" }}
+      >
         <div className="relative w-full px-4 sm:px-8 md:px-12 lg:px-16 py-10 md:py-14 lg:py-16">
           <div className="flex flex-col items-center text-center max-w-5xl mx-auto">
             
             <div className="relative mb-5">
-              <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full scale-110"></div>
-              <div className="relative w-[60px] h-[60px] md:w-[72px] md:h-[72px] rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-[0_10px_35px_rgba(59,130,246,0.25)] border border-blue-400/30">
-                <Scale className="w-7 h-7 md:w-9 md:h-9 text-white" />
+              <div className="absolute inset-0 bg-[#2583FF]/20 blur-2xl rounded-full scale-110"></div>
+              <div className="relative w-[60px] h-[60px] md:w-[72px] md:h-[72px] rounded-2xl bg-gradient-to-br from-[#2583FF] to-[#1261D8] flex items-center justify-center shadow-[0_10px_35px_rgba(37,131,255,0.25)] border border-[#4196FF]/30">
+                <Scale className="w-7 h-7 md:w-9 md:h-9 text-[#F5F7FA]" />
               </div>
             </div>
             
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-4 rounded-md bg-blue-500/5 border border-blue-500/20 text-blue-400 text-[10px] font-bold tracking-widest uppercase">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-4 rounded-md bg-[rgba(37,131,255,0.05)] border border-[rgba(37,131,255,0.2)] text-[#2583FF] text-[10px] font-bold tracking-widest uppercase">
               <CheckCircle size={12} />
               {t("KYROX · RICHTLINIEN", "KYROX · POLICIES")}
             </span>
 
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-3 leading-[1.1]">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-[#F5F7FA] tracking-tight mb-3 leading-[1.1]">
               {t("Richtlinien & Rechtliches", "Policies & Legal")}
             </h1>
             
-            <div className="w-16 h-1 bg-gradient-to-r from-transparent via-blue-500/80 to-transparent rounded-full mb-5"></div>
+            <div className="w-16 h-1 bg-gradient-to-r from-transparent via-[#2583FF]/80 to-transparent rounded-full mb-5"></div>
 
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-6 max-w-[720px]">
+            <p className="text-[#A5B0C2] text-sm md:text-base leading-relaxed mb-6 max-w-[720px]">
               {t(
                 "Alle wichtigen Nutzungsbedingungen, Datenschutzinformationen und Regeln für die Nutzung des KyroX Discord-Bots und seiner Funktionen an einem zentralen Ort.",
                 "All important terms of use, privacy information, and rules for using the KyroX Discord bot and its functions in one central place."
@@ -419,117 +440,121 @@ export default function Page() {
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-6">
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-[#0f1117] border border-[#1e2028] rounded-lg px-3 py-1.5">
-                <FileText size={12} className="text-blue-400" />
+              <div className="flex items-center gap-1.5 text-xs text-[#A5B0C2] bg-[#10151E] border border-[#202938] rounded-lg px-3 py-1.5">
+                <FileText size={12} className="text-[#2583FF]" />
                 <span>{t("150 KyroX Richtlinien", "150 KyroX Policies")}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-[#0f1117] border border-[#1e2028] rounded-lg px-3 py-1.5">
-                <Bot size={12} className="text-blue-400" />
+              <div className="flex items-center gap-1.5 text-xs text-[#A5B0C2] bg-[#10151E] border border-[#202938] rounded-lg px-3 py-1.5">
+                <Bot size={12} className="text-[#2583FF]" />
                 <span>{t("Kostenloser Discord Service", "Free Discord Service")}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-[#0f1117] border border-[#1e2028] rounded-lg px-3 py-1.5">
-                <Shield size={12} className="text-blue-400" />
+              <div className="flex items-center gap-1.5 text-xs text-[#A5B0C2] bg-[#10151E] border border-[#202938] rounded-lg px-3 py-1.5">
+                <Shield size={12} className="text-[#2583FF]" />
                 <span>{t("Offizielle KyroX Richtlinie", "Official KyroX Policy")}</span>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full max-w-md sm:max-w-none sm:justify-center">
-              <div className="flex items-center gap-3 bg-[#0f1117] border border-[#1e2028] rounded-xl px-5 py-3 transition-colors hover:border-blue-500/40 w-full sm:w-auto justify-center sm:justify-start">
-                <Clock size={18} className="text-blue-400 flex-shrink-0" />
+              <div className="flex items-center gap-3 bg-[#10151E] border border-[#202938] rounded-xl px-5 py-3 transition-colors hover:border-[#2583FF]/40 w-full sm:w-auto justify-center sm:justify-start">
+                <Clock size={18} className="text-[#2583FF] flex-shrink-0" />
                 <div className="text-left">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500">{t("Letzte Aktualisierung", "Last Updated")}</p>
-                  <p className="text-sm font-semibold text-white">21.08.2026</p>
+                  <p className="text-[10px] uppercase tracking-widest text-[#69758A]">{t("Letzte Aktualisierung", "Last Updated")}</p>
+                  <p className="text-sm font-semibold text-[#F5F7FA]">21.08.2026</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-[#0f1117] border border-[#1e2028] rounded-xl px-5 py-3 transition-colors hover:border-blue-500/40 w-full sm:w-auto justify-center sm:justify-start">
-                <Calendar size={18} className="text-blue-400 flex-shrink-0" />
+              <div className="flex items-center gap-3 bg-[#10151E] border border-[#202938] rounded-xl px-5 py-3 transition-colors hover:border-[#2583FF]/40 w-full sm:w-auto justify-center sm:justify-start">
+                <Calendar size={18} className="text-[#2583FF] flex-shrink-0" />
                 <div className="text-left">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500">{t("Gültig ab", "Valid From")}</p>
-                  <p className="text-sm font-semibold text-white">21.08.2026</p>
+                  <p className="text-[10px] uppercase tracking-widest text-[#69758A]">{t("Gültig ab", "Valid From")}</p>
+                  <p className="text-sm font-semibold text-[#F5F7FA]">21.08.2026</p>
                 </div>
               </div>
-              <button onClick={() => setLang(lang === "de" ? "en" : "de")} className="flex items-center gap-3 bg-[#0f1117] border border-[#1e2028] rounded-xl px-5 py-3 transition-colors hover:border-blue-500/40 w-full sm:w-auto justify-center sm:justify-start">
-                <Languages size={18} className="text-blue-400 flex-shrink-0" />
+              <button onClick={() => setLang(lang === "de" ? "en" : "de")} className="flex items-center gap-3 bg-[#10151E] border border-[#202938] rounded-xl px-5 py-3 transition-colors hover:border-[#2583FF]/40 w-full sm:w-auto justify-center sm:justify-start">
+                <Languages size={18} className="text-[#2583FF] flex-shrink-0" />
                 <div className="text-left">
-                  <p className="text-[10px] uppercase tracking-widest text-slate-500">{t("Sprache", "Language")}</p>
-                  <p className="text-sm font-semibold text-white">{lang === "de" ? "English" : "Deutsch"}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-[#69758A]">{t("Sprache", "Language")}</p>
+                  <p className="text-sm font-semibold text-[#F5F7FA]">{lang === "de" ? "English" : "Deutsch"}</p>
                 </div>
               </button>
             </div>
 
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#2583FF]/40 to-transparent"></div>
       </header>
 
-      <div className="lg:hidden sticky top-0 z-30 bg-[#0a0b0e]/95 backdrop-blur-xl border-b border-[#1e2028]/50">
+      <div className="lg:hidden sticky top-0 z-30 bg-[#07090D]/95 backdrop-blur-xl border-b border-[#202938]/50">
         <button 
           onClick={() => setIsTocOpen(true)}
-          className="w-full flex items-center justify-between px-5 py-4 text-slate-200 font-medium min-h-[52px] active:bg-white/5 transition-colors"
+          className="w-full flex items-center justify-between px-5 py-4 text-[#F5F7FA] font-medium min-h-[52px] active:bg-[#151C28] transition-colors"
           aria-expanded={isTocOpen}
           aria-controls="mobile-toc"
           aria-label="Inhaltsverzeichnis öffnen"
         >
           <span className="flex items-center gap-3">
-            <Menu size={22} className="text-blue-500" />
+            <Menu size={22} className="text-[#2583FF]" />
             <span className="text-base">{t("Inhaltsverzeichnis", "Table of Contents")}</span>
           </span>
-          <ChevronRight size={22} className="text-slate-500" />
+          <ChevronRight size={22} className="text-[#69758A]" />
         </button>
       </div>
 
       <div className="lg:grid lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] w-full">
         
-        <aside className="hidden lg:flex flex-col sticky top-0 h-screen border-r border-[#1e2028] bg-[#0a0b0e]">
-          <div className="p-6 border-b border-[#1e2028]">
+        <aside className="hidden lg:flex flex-col sticky top-0 h-screen border-r border-[#202938] bg-[#0C111A]">
+          <div className="p-6 border-b border-[#202938]">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-white flex items-center gap-2.5 mb-1">
-                <FileText size={16} className="text-blue-500" />
+              <h3 className="text-sm font-bold uppercase tracking-widest text-[#F5F7FA] flex items-center gap-2.5 mb-1">
+                <FileText size={16} className="text-[#2583FF]" />
                 {t("KyroX Richtlinien", "KyroX Policies")}
               </h3>
-              <button onClick={() => setLang(lang === "de" ? "en" : "de")} className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-md border border-[#1e2028]">
-                <Languages size={14} className="text-blue-500" />
+              <button onClick={() => setLang(lang === "de" ? "en" : "de")} className="flex items-center gap-1 text-xs text-[#A5B0C2] hover:text-[#F5F7FA] transition-colors px-2 py-1 rounded-md border border-[#202938]">
+                <Languages size={14} className="text-[#2583FF]" />
                 {lang === "de" ? "EN" : "DE"}
               </button>
             </div>
-            <p className="text-xs text-slate-500 ml-[26px]">{t("150 KyroX Richtlinien", "150 KyroX Policies")}</p>
+            <p className="text-xs text-[#69758A] ml-[26px]">{t("150 KyroX Richtlinien", "150 KyroX Policies")}</p>
           </div>
-          <div className="p-4 border-b border-[#1e2028]">
+          <div className="p-4 border-b border-[#202938]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#69758A]" />
               <input
                 type="text"
                 placeholder={t("Abschnitt suchen...", "Search section...")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#11131a] border border-[#1e2028] rounded-lg pl-10 pr-3 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all"
+                className="w-full bg-[#0A0E15] border border-[#202938] rounded-lg pl-10 pr-3 py-2.5 text-sm text-[#F5F7FA] placeholder:text-[#69758A] focus:outline-none focus:border-[#2583FF]/50 focus:ring-1 focus:ring-[#2583FF]/20 transition-all"
               />
             </div>
           </div>
-          <nav className={`p-3 overflow-y-auto flex-1 ${scrollbarHideClasses}`}>
+          <nav ref={desktopNavRef} className={`p-3 overflow-y-auto flex-1 ${scrollbarHideClasses}`}>
             {filteredTocCategories.length === 0 ? (
-              <p className="text-slate-500 text-sm text-center py-6">{t("Keine Ergebnisse gefunden.", "No results found.")}</p>
+              <p className="text-[#69758A] text-sm text-center py-6">{t("Keine Ergebnisse gefunden.", "No results found.")}</p>
             ) : (
               filteredTocCategories.map((category) => (
                 <div key={category.title_de} className="mb-5">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 px-4 mb-2">{t(category.title_de, category.title_en)}</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#69758A] px-4 mb-2">{t(category.title_de, category.title_en)}</h4>
                   <ul className="space-y-0.5">
-                    {category.items.map((item) => (
-                      <li key={item.id}>
-                        <a
-                          href={`#${item.id}`}
-                          onClick={(e) => handleTocClick(e, item.id)}
-                          className={`flex items-center gap-3 px-4 py-2 text-sm transition-all border-l-2 ${
-                            activeSection === item.id
-                              ? "border-blue-500 text-blue-400 bg-blue-500/[0.07] font-medium"
-                              : "border-transparent text-slate-500 hover:text-slate-200 hover:bg-white/[0.03]"
-                          }`}
-                        >
-                          <span className={`text-xs font-mono ${activeSection === item.id ? "text-blue-500" : "text-slate-600"}`}>{item.num}</span>
-                          <span className="whitespace-normal break-words">{t(item.title_de, item.title_en)}</span>
-                        </a>
-                      </li>
-                    ))}
+                    {category.items.map((item) => {
+                      const isActive = activeSection === item.id;
+                      return (
+                        <li key={item.id}>
+                          <a
+                            href={`#${item.id}`}
+                            onClick={(e) => handleTocClick(e, item.id)}
+                            ref={isActive ? activeTocItemRef : null}
+                            className={`flex items-center gap-3 px-4 py-2 text-sm transition-all border-l-2 ${
+                              isActive
+                                ? "border-[#2583FF] text-[#F5F7FA] bg-[rgba(37,131,255,0.10)] font-medium"
+                                : "border-transparent text-[#69758A] hover:text-[#A5B0C2] hover:bg-[#151C28]"
+                            }`}
+                          >
+                            <span className={`text-xs font-mono ${isActive ? "text-[#2583FF]" : "text-[#69758A]"}`}>{item.num}</span>
+                            <span className="whitespace-normal break-words">{t(item.title_de, item.title_en)}</span>
+                          </a>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))
@@ -567,11 +592,11 @@ export default function Page() {
                     "These policies apply to the use of the KyroX Discord bot and all functions and services provided by KyroX within Discord. This includes internal technical systems as far as they are necessary for the operation of the bot."
                   )}
                 </p>
-                <p className="mb-4 text-slate-400">{t("Dazu gehören insbesondere:", "This includes in particular:")}</p>
+                <p className="mb-4 text-[#A5B0C2]">{t("Dazu gehören insbesondere:", "This includes in particular:")}</p>
                 <RuleList items={L([
                   ["Slash Commands", "Slash Commands"], ["Discord Buttons", "Discord Buttons"], ["Select Menus", "Select Menus"], ["Modals", "Modals"], ["Components V2", "Components V2"], ["Server-Konfiguration", "Server Configuration"], ["Moderation", "Moderation"], ["Sicherheit", "Security"], ["Tickets", "Tickets"], ["Ticket-Transcripts", "Ticket Transcripts"], ["Backups", "Backups"], ["Logging", "Logging"], ["Welcome", "Welcome"], ["Goodbye", "Goodbye"], ["Level-System", "Level System"], ["Counting", "Counting"], ["Embeds", "Embeds"], ["Team-Verwaltung", "Team Management"], ["User Premium", "User Premium"], ["Server Premium", "Server Premium"], ["Server Credits", "Server Credits"], ["Premium Gift-Codes", "Premium Gift Codes"], ["Events", "Events"], ["Event Premium", "Event Premium"], ["Event Gift-Codes", "Event Gift Codes"], ["Event-Rabatte", "Event Discounts"]
                 ])} />
-                <p className="mt-4 mb-4 text-slate-400">{t("Die Regeln gelten für:", "The rules apply to:")}</p>
+                <p className="mt-4 mb-4 text-[#A5B0C2]">{t("Die Regeln gelten für:", "The rules apply to:")}</p>
                 <RuleList items={L([
                   ["Nutzer", "Users"], ["Server-Owner", "Server Owners"], ["Administratoren", "Administrators"], ["Moderatoren", "Moderators"], ["Teammitglieder", "Team Members"], ["Personen, die KyroX Funktionen verwenden", "Persons using KyroX features"]
                 ])} />
@@ -947,9 +972,9 @@ export default function Page() {
                     "Monthly Server Premium is a time-limited model that unlocks advanced features for a Discord server for the duration of one month. It can be extended via internal KyroX functions to remain active. KyroX does not charge real money for this."
                   )}
                 </p>
-                <div className="bg-[#0d0e12] border border-[#1e2028] rounded-xl p-5 text-center mb-4">
-                  <Clock className="w-6 h-6 text-blue-400 mx-auto mb-3" />
-                  <p className="text-white font-semibold">{t("Monthly Server Premium", "Monthly Server Premium")}</p>
+                <div className="bg-[#10151E] border border-[#202938] rounded-xl p-5 text-center mb-4">
+                  <Clock className="w-6 h-6 text-[#2583FF] mx-auto mb-3" />
+                  <p className="text-[#F5F7FA] font-semibold">{t("Monthly Server Premium", "Monthly Server Premium")}</p>
                 </div>
                 <p className="leading-[1.75]">
                   {t(
@@ -966,9 +991,9 @@ export default function Page() {
                     "Lifetime Server Premium is an internal model that unlocks advanced features for a Discord server indefinitely. No real money is charged for this."
                   )}
                 </p>
-                <div className="bg-[#0d0e12] border border-[#1e2028] rounded-xl p-5 text-center mb-4">
-                  <InfinityIcon className="w-6 h-6 text-blue-400 mx-auto mb-3" />
-                  <p className="text-white font-semibold">{t("Lifetime Server Premium", "Lifetime Server Premium")}</p>
+                <div className="bg-[#10151E] border border-[#202938] rounded-xl p-5 text-center mb-4">
+                  <InfinityIcon className="w-6 h-6 text-[#2583FF] mx-auto mb-3" />
+                  <p className="text-[#F5F7FA] font-semibold">{t("Lifetime Server Premium", "Lifetime Server Premium")}</p>
                 </div>
                 <p className="leading-[1.75]">
                   {t(
@@ -985,8 +1010,8 @@ export default function Page() {
                     "Server Credits are an internal KyroX unit. They are not legal tender, have no guaranteed real money value, and are primarily intended for designated KyroX bot functions. KyroX does not sell Server Credits for real money."
                   )}
                 </p>
-                <div className="bg-[#0d0e12] border border-[#1e2028] rounded-xl p-6 mb-4">
-                  <p className="text-sm text-slate-400 mb-4">{t("Für Server Credits gelten folgende Regeln:", "The following rules apply to Server Credits:")}</p>
+                <div className="bg-[#10151E] border border-[#202938] rounded-xl p-6 mb-4">
+                  <p className="text-sm text-[#A5B0C2] mb-4">{t("Für Server Credits gelten folgende Regeln:", "The following rules apply to Server Credits:")}</p>
                   <RuleList items={L([
                     ["kein gesetzliches Zahlungsmittel", "no legal tender"], ["kein garantierter Geldwert", "no guaranteed money value"], ["grundsätzlich serverbezogen", "primarily server-related"], ["nur für KyroX Funktionen nutzbar", "only usable for KyroX functions"], ["Manipulation und Duplizierung verboten", "manipulation and duplication prohibited"]
                   ])} />
@@ -1174,7 +1199,7 @@ export default function Page() {
                 </p>
               </Section>
 
-              <Section id="event-rabatte" num="39" title={t("Event-Rabatte", "Event Discounts")} icon={CreditCard}>
+              <Section id="event-rabatte" num="39" title={t("Event-Rabatte", "Event Discountsss")} icon={CreditCard}>
                 <p className="mb-4 leading-[1.75]">
                   {t(
                     "Im Rahmen zeitlich begrenzter Events kann KyroX besondere Rabatte auf Server-Premium-Angebote bereitstellen. Der Begriff \"Rabatt\" bezieht sich bei KyroX ausschließlich auf interne Server Credits (z.B. weniger Server Credits erforderlich) und beinhaltet kein Echtgeld. Diese Rabatte müssen über Bot-Commands beansprucht werden und gelten nur während des aktiven Events.",
@@ -1193,9 +1218,9 @@ export default function Page() {
                 <RuleList items={L([
                   ["nur Server-Owner", "Server Owners only"], ["Rabatt gehört global zum Discord-User", "Discount belongs globally to the Discord User"], ["gilt für Server, auf denen dieser User Owner ist", "applies to servers where this user is Owner"], ["Rabatt kann nur einmal verwendet werden", "Discount can only be used once"], ["entweder Monthly ODER Lifetime", "either Monthly OR Lifetime"], ["nicht für beide Modelle gleichzeitig", "not for both models simultaneously"], ["erfolgreiche Verwendung verbraucht den Rabatt global", "successful usage consumes the discount globally"]
                 ])} />
-                <div className="bg-[#0d0e12] border border-blue-500/20 rounded-xl p-6 mt-4">
-                  <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2"><Info size={18} className="text-blue-400" /> {t("Beispiel", "Example")}</h4>
-                  <p className="text-slate-400 text-sm leading-relaxed">
+                <div className="bg-[#10151E] border border-[rgba(37,131,255,0.2)] rounded-xl p-6 mt-4">
+                  <h4 className="text-sm font-bold text-[#F5F7FA] mb-2 flex items-center gap-2"><Info size={18} className="text-[#2583FF]" /> {t("Beispiel", "Example")}</h4>
+                  <p className="text-[#A5B0C2] text-sm leading-relaxed">
                     {t(
                       "User A besitzt Server 1, Server 2 und Server 3. User A verwendet seinen Event-Rabatt auf Server 1 für einen Monthly-Premium-Kauf. Danach steht derselbe Rabatt auch auf Server 2 und Server 3 nicht mehr zur Verfügung.",
                       "User A owns Server 1, Server 2, and Server 3. User A uses their Event Discount on Server 1 for a Monthly Premium purchase. After that, the same discount is no longer available on Server 2 and Server 3."
@@ -1686,8 +1711,8 @@ export default function Page() {
                     "Users are responsible for server configurations and the allocation of permissions themselves. A complete general liability exemption is not granted, but legally mandatory liabilities are not excluded."
                   )}
                 </p>
-                <div className="bg-[#0d0e12] border border-blue-500/20 rounded-xl p-6">
-                  <p className="text-sm text-slate-400 mb-3 font-medium">{t("Haftungsansprüche bestehen insbesondere bei:", "Liability claims exist in particular for:")}</p>
+                <div className="bg-[#10151E] border border-[rgba(37,131,255,0.2)] rounded-xl p-6">
+                  <p className="text-sm text-[#A5B0C2] mb-3 font-medium">{t("Haftungsansprüche bestehen insbesondere bei:", "Liability claims exist in particular for:")}</p>
                   <RuleList items={L([
                     ["Vorsatz", "Intent"], ["grober Fahrlässigkeit", "Gross negligence"], ["Verletzung von Leben, Körper oder Gesundheit", "Breach of life, body, or health"], ["gesetzlich zwingender Haftung", "Legally mandatory liability"]
                   ])} />
@@ -1710,14 +1735,14 @@ export default function Page() {
               </Section>
 
               <Section id="kontakt-support" num="75" title={t("Kontakt & Support", "Contact & Support")} icon={MessageSquare}>
-                <div className="bg-gradient-to-br from-[#11131a] to-[#0d0e12] border border-[#1e2028] rounded-2xl p-7 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.1)]">
+                <div className="bg-gradient-to-br from-[#0A0E15] to-[#07090D] border border-[#202938] rounded-2xl p-7 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.1)]">
                   <div className="flex items-center gap-4 mb-5">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-                      <Headphones className="w-6 h-6 text-blue-400" />
+                    <div className="w-12 h-12 rounded-xl bg-[rgba(37,131,255,0.1)] border border-[rgba(37,131,255,0.2)] flex items-center justify-center flex-shrink-0">
+                      <Headphones className="w-6 h-6 text-[#2583FF]" />
                     </div>
-                    <h3 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">{t("Fragen zu den Richtlinien?", "Questions about the policies?")}</h3>
+                    <h3 className="text-xl md:text-2xl font-extrabold text-[#F5F7FA] tracking-tight">{t("Fragen zu den Richtlinien?", "Questions about the policies?")}</h3>
                   </div>
-                  <p className="text-slate-400 mb-8 text-sm md:text-base leading-relaxed">
+                  <p className="text-[#A5B0C2] mb-8 text-sm md:text-base leading-relaxed">
                     {t(
                       "Wenn du Fragen zur Nutzung von KyroX, diesen Richtlinien oder zum Datenschutz hast, kannst du dich jederzeit über unseren offiziellen Discord Support Server an uns wenden. Supportanfragen können über den offiziellen KyroX Discord-Server gestellt werden.",
                       "If you have questions about using KyroX, these policies, or privacy, you can reach out to us anytime via our official Discord Support Server. Support requests can be made via the official KyroX Discord server."
@@ -1725,19 +1750,19 @@ export default function Page() {
                   </p>
                   
                   <div className="grid gap-4">
-                    <a href="https://discord.gg/JFaDGaFkk5" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 bg-[#0a0b0e] border border-[#1e2028] rounded-xl p-5 hover:border-blue-500/50 hover:bg-[#11131a] transition-all group min-h-[56px]">
-                      <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors flex-shrink-0">
-                        <MessageSquare className="w-6 h-6 text-blue-400" />
+                    <a href="https://discord.gg/JFaDGaFkk5" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 bg-[#0A0E15] border border-[#202938] rounded-xl p-5 hover:border-[#2583FF]/50 hover:bg-[#10151E] transition-all group min-h-[56px]">
+                      <div className="w-12 h-12 rounded-xl bg-[rgba(37,131,255,0.1)] flex items-center justify-center group-hover:bg-[rgba(37,131,255,0.2)] transition-colors flex-shrink-0">
+                        <MessageSquare className="w-6 h-6 text-[#2583FF]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-semibold text-white group-hover:text-blue-300 transition-colors">{t("KyroX Support", "KyroX Support")}</p>
-                        <p className="text-sm text-slate-500 transition-colors truncate">{t("Discord Support Server", "Discord Support Server")}</p>
+                        <p className="text-base font-semibold text-[#F5F7FA] group-hover:text-[#4196FF] transition-colors">{t("KyroX Support", "KyroX Support")}</p>
+                        <p className="text-sm text-[#69758A] transition-colors truncate">{t("Discord Support Server", "Discord Support Server")}</p>
                       </div>
-                      <ExternalLink size={20} className="text-slate-600 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                      <ExternalLink size={20} className="text-[#69758A] group-hover:text-[#2583FF] transition-colors flex-shrink-0" />
                     </a>
                   </div>
 
-                  <div className="mt-7 pt-5 border-t border-[#1e2028] text-xs md:text-sm text-slate-500 flex flex-wrap gap-4">
+                  <div className="mt-7 pt-5 border-t border-[#202938] text-xs md:text-sm text-[#69758A] flex flex-wrap gap-4">
                     <span>{t("Betreiber: KyroX™ Official", "Operator: KyroX™ Official")}</span>
                   </div>
                 </div>
@@ -2495,37 +2520,37 @@ export default function Page() {
               <CategoryDivider title={t("SUPPORT & ABSCHLUSS", "SUPPORT & CONCLUSION")} />
 
               <Section id="support-detail" num="148" title={t("Support", "Support")} icon={MessageSquare}>
-                <div className="bg-gradient-to-br from-[#11131a] to-[#0d0e12] border border-[#1e2028] rounded-2xl p-7 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.1)]">
+                <div className="bg-gradient-to-br from-[#0A0E15] to-[#07090D] border border-[#202938] rounded-2xl p-7 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.1)]">
                   <div className="flex items-center gap-4 mb-5">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-                      <Headphones className="w-6 h-6 text-blue-400" />
+                    <div className="w-12 h-12 rounded-xl bg-[rgba(37,131,255,0.1)] border border-[rgba(37,131,255,0.2)] flex items-center justify-center flex-shrink-0">
+                      <Headphones className="w-6 h-6 text-[#2583FF]" />
                     </div>
-                    <h3 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">{t("KyroX Support & Community", "KyroX Support & Community")}</h3>
+                    <h3 className="text-xl md:text-2xl font-extrabold text-[#F5F7FA] tracking-tight">{t("KyroX Support & Community", "KyroX Support & Community")}</h3>
                   </div>
-                  <p className="text-slate-400 mb-8 text-sm md:text-base leading-relaxed">
+                  <p className="text-[#A5B0C2] mb-8 text-sm md:text-base leading-relaxed">
                     {t(
                       "Offizieller Discord-Server für Support, Fragen und Community.",
                       "Official Discord server for support, questions, and community."
                     )}
                   </p>
                   
-                  <a href="https://discord.gg/JFaDGaFkk5" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 bg-[#0a0b0e] border border-[#1e2028] rounded-xl p-5 hover:border-blue-500/50 hover:bg-[#11131a] transition-all group min-h-[56px]">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors flex-shrink-0">
-                      <MessageSquare className="w-6 h-6 text-blue-400" />
+                  <a href="https://discord.gg/JFaDGaFkk5" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 bg-[#0A0E15] border border-[#202938] rounded-xl p-5 hover:border-[#2583FF]/50 hover:bg-[#10151E] transition-all group min-h-[56px]">
+                    <div className="w-12 h-12 rounded-xl bg-[rgba(37,131,255,0.1)] flex items-center justify-center group-hover:bg-[rgba(37,131,255,0.2)] transition-colors flex-shrink-0">
+                      <MessageSquare className="w-6 h-6 text-[#2583FF]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-base font-semibold text-white group-hover:text-blue-300 transition-colors">{t("Offizieller Discord-Server", "Official Discord Server")}</p>
-                      <p className="text-sm text-slate-500 transition-colors truncate">https://discord.gg/JFaDGaFkk5</p>
+                      <p className="text-base font-semibold text-[#F5F7FA] group-hover:text-[#4196FF] transition-colors">{t("Offizieller Discord-Server", "Official Discord Server")}</p>
+                      <p className="text-sm text-[#69758A] transition-colors truncate">https://discord.gg/JFaDGaFkk5</p>
                     </div>
-                    <ExternalLink size={20} className="text-slate-600 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                    <ExternalLink size={20} className="text-[#69758A] group-hover:text-[#2583FF] transition-colors flex-shrink-0" />
                   </a>
                 </div>
               </Section>
 
               <Section id="betreiber" num="149" title={t("Betreiber", "Operator")} icon={FileText}>
-                <div className="bg-[#0d0e12] border border-blue-500/20 rounded-xl p-6">
-                  <p className="text-sm text-slate-400 mb-2 font-medium">{t("Betreiber des KyroX Discord-Bots:", "Operator of the KyroX Discord bot:")}</p>
-                  <p className="text-base font-semibold text-white">KyroX™ Official</p>
+                <div className="bg-[#10151E] border border-[rgba(37,131,255,0.2)] rounded-xl p-6">
+                  <p className="text-sm text-[#A5B0C2] mb-2 font-medium">{t("Betreiber des KyroX Discord-Bots:", "Operator of the KyroX Discord bot:")}</p>
+                  <p className="text-base font-semibold text-[#F5F7FA]">KyroX™ Official</p>
                 </div>
               </Section>
 
@@ -2548,7 +2573,7 @@ export default function Page() {
                     "If you have questions, the official KyroX Support is available: https://discord.gg/JFaDGaFkk5"
                   )}
                 </p>
-                <p className="mt-4 leading-[1.75] font-semibold text-white">
+                <p className="mt-4 leading-[1.75] font-semibold text-[#F5F7FA]">
                   {t("Betreiber: KyroX™ Official", "Operator: KyroX™ Official")}
                 </p>
               </Section>
@@ -2564,8 +2589,8 @@ export default function Page() {
 function CategoryDivider({ title }) {
   return (
     <div className="mt-10 mb-8 first:mt-0">
-      <h2 className="text-sm font-extrabold uppercase tracking-widest text-blue-500 mb-2">{title}</h2>
-      <div className="w-full h-px bg-gradient-to-r from-blue-500/40 via-[#1e2028] to-transparent"></div>
+      <h2 className="text-sm font-extrabold uppercase tracking-widest text-[#2583FF] mb-2">{title}</h2>
+      <div className="w-full h-px bg-[#202938]"></div>
     </div>
   );
 }
@@ -2574,18 +2599,18 @@ function Section({ id, num, title, icon: Icon, children }) {
   return (
     <section id={id} className="scroll-mt-24">
       <div className="flex items-center gap-3 sm:gap-4 mb-3">
-        <span className="h-9 sm:h-10 px-2.5 sm:px-3 flex items-center justify-center text-xs sm:text-sm font-mono text-blue-400 bg-blue-500/[0.05] border border-blue-500/20 rounded-lg flex-shrink-0">
+        <span className="h-9 sm:h-10 px-2.5 sm:px-3 flex items-center justify-center text-xs sm:text-sm font-mono text-[#2583FF] bg-[rgba(37,131,255,0.05)] border border-[rgba(37,131,255,0.2)] rounded-lg flex-shrink-0">
           {num}
         </span>
-        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0 shadow-[0_0_15px_rgba(59,130,246,0.05)]">
-          <Icon className="w-5 h-5 text-blue-400" />
+        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-[rgba(37,131,255,0.1)] border border-[rgba(37,131,255,0.2)] flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-[#2583FF]" />
         </div>
-        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
+        <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#F5F7FA] tracking-tight leading-tight">
           {title}
         </h3>
       </div>
-      <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-400/30 rounded-full mb-8"></div>
-      <div className="text-slate-300 text-[15px] md:text-base leading-[1.75] space-y-5">
+      <div className="w-16 h-1 bg-gradient-to-r from-[#2583FF] to-transparent rounded-full mb-8"></div>
+      <div className="text-[#A5B0C2] text-[15px] md:text-base leading-[1.75] space-y-5">
         {children}
       </div>
     </section>
@@ -2594,10 +2619,10 @@ function Section({ id, num, title, icon: Icon, children }) {
 
 function RuleList({ items }) {
   return (
-    <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-0 my-4 border-t border-[#1e2028]/40">
+    <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-0 my-4 border-t border-[#202938]/40">
       {items.map((item, index) => (
-        <li key={index} className="flex items-start gap-2.5 text-sm md:text-[15px] text-slate-400 py-3 border-b border-[#1e2028]/40">
-          <CheckCircle size={16} className="text-blue-400 mt-1 flex-shrink-0" />
+        <li key={index} className="flex items-start gap-2.5 text-sm md:text-[15px] text-[#A5B0C2] py-3 border-b border-[#202938]/40">
+          <CheckCircle size={16} className="text-[#2583FF] mt-1 flex-shrink-0" />
           <span className="break-words whitespace-normal">{item}</span>
         </li>
       ))}
@@ -2606,20 +2631,32 @@ function RuleList({ items }) {
 }
 
 function InfoBox({ children, type = "info", title, icon: CustomIcon }) {
-  const styles = type === "warning" 
-    ? "bg-amber-500/[0.07] border-amber-500/30 text-amber-200" 
-    : type === "security"
-    ? "bg-emerald-500/[0.07] border-emerald-500/30 text-emerald-200"
-    : "bg-blue-500/[0.07] border-blue-500/30 text-blue-200";
+  let styles = "";
+  let Icon = CustomIcon ? CustomIcon : Info;
   
-  const Icon = CustomIcon ? CustomIcon : (type === "warning" ? AlertTriangle : Info);
+  if (type === "warning") {
+    styles = "bg-[rgba(245,185,66,0.07)] border-[#F5B942] text-[#F5B942]";
+    Icon = CustomIcon ? CustomIcon : AlertTriangle;
+  } else if (type === "security") {
+    // Für Datenschutz / Sicherheit verwenden wir Blau, um beim Branding zu bleiben
+    styles = "bg-[rgba(37,131,255,0.07)] border-[#2583FF] text-[#2583FF]";
+  } else if (type === "error") {
+    styles = "bg-[rgba(240,82,82,0.07)] border-[#F05252] text-[#F05252]";
+    Icon = CustomIcon ? CustomIcon : Ban;
+  } else if (type === "success") {
+    styles = "bg-[rgba(53,201,133,0.07)] border-[#35C985] text-[#35C985]";
+    Icon = CustomIcon ? CustomIcon : CheckCircle;
+  } else {
+    // Info default: Blau
+    styles = "bg-[rgba(37,131,255,0.07)] border-[#2583FF] text-[#2583FF]";
+  }
 
   return (
-    <div className={`flex items-start gap-4 border-l-4 border rounded-r-xl p-5 my-6 ${styles} shadow-sm`}>
+    <div className={`flex items-start gap-4 border-l-4 rounded-r-xl p-5 my-6 ${styles} shadow-sm`}>
       <Icon size={22} className="flex-shrink-0 mt-0.5 opacity-90" />
       <div className="flex-1">
-        {title && <h4 className="text-sm font-extrabold text-white mb-1">{title}</h4>}
-        <div className="text-sm md:text-[15px] leading-relaxed text-slate-300">{children}</div>
+        {title && <h4 className="text-sm font-extrabold text-[#F5F7FA] mb-1">{title}</h4>}
+        <div className="text-sm md:text-[15px] leading-relaxed text-[#A5B0C2]">{children}</div>
       </div>
     </div>
   );
