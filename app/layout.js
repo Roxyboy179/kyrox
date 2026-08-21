@@ -22,7 +22,7 @@ export const metadata = {
   },
 
   description:
-    "KyroX is a modern Discord bot for server management, moderation, tickets, automation, premium features and more.",
+    "KyroX ist ein moderner Discord-Bot für Serververwaltung, Moderation, Tickets, Automatisierungen, Premium-Funktionen und mehr.",
 
   applicationName: "KyroX",
 
@@ -53,26 +53,25 @@ export const metadata = {
 
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "de_DE",
     siteName: "KyroX",
     title: "KyroX",
     description:
-      "Manage your Discord server with KyroX — moderation, tickets, automation, premium features and more.",
-    url: "https://kyrox-eight.vercel.app",
+      "Verwalte deinen Discord-Server mit KyroX – Moderation, Tickets, Automatisierungen, Premium und mehr.",
   },
 
   twitter: {
     card: "summary_large_image",
     title: "KyroX",
     description:
-      "Manage your Discord server with KyroX — moderation, tickets, automation, premium features and more.",
+      "Verwalte deinen Discord-Server mit KyroX – Moderation, Tickets, Automatisierungen, Premium und mehr.",
   },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="de"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
