@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://kyrox.example.com"),
+  metadataBase: new URL("https://kyrox-eight.vercel.app"),
 
   title: {
     default: "KyroX",
