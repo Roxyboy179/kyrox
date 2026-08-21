@@ -310,6 +310,8 @@ export default function Page() {
     }
   };
 
+  const scrollbarHideClasses = "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]";
+
   return (
     <div className="min-h-screen bg-[#0a0b0e] text-slate-300 font-sans selection:bg-blue-500/30 selection:text-white">
       
@@ -354,7 +356,7 @@ export default function Page() {
             />
           </div>
         </div>
-        <nav className="p-3 overflow-y-auto flex-1">
+        <nav className={`p-3 overflow-y-auto flex-1 ${scrollbarHideClasses}`}>
           {filteredTocCategories.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-6">{t("Keine Ergebnisse.", "No results.")}</p>
           ) : (
@@ -504,7 +506,7 @@ export default function Page() {
               />
             </div>
           </div>
-          <nav className="p-3 overflow-y-auto flex-1">
+          <nav className={`p-3 overflow-y-auto flex-1 ${scrollbarHideClasses}`}>
             {filteredTocCategories.length === 0 ? (
               <p className="text-slate-500 text-sm text-center py-6">{t("Keine Ergebnisse gefunden.", "No results found.")}</p>
             ) : (
