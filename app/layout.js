@@ -14,9 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = "https://kyrox-eight.vercel.app";
-const title = "Richtlinien & Rechtliches | KyroX";
+
+const title = "Policies, Terms & Privacy | KyroX";
+
 const description =
-  "Offizielle KyroX-Richtlinien zu Nutzung, Datenschutz, Moderation, Premium, Server Credits, Events und weiteren Bot-Funktionen.";
+  "Read the official KyroX policies, terms of use and privacy information. Learn about moderation, data processing, Premium, Server Credits, events, user responsibilities, prohibited use and all Discord bot features.";
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
@@ -25,6 +27,7 @@ export const metadata = {
     default: title,
     template: "%s | KyroX",
   },
+
   description,
   applicationName: "KyroX",
   category: "legal",
@@ -36,22 +39,29 @@ export const metadata = {
 
   keywords: [
     "KyroX",
-    "KyroX Richtlinien",
-    "KyroX Nutzungsbedingungen",
-    "KyroX Datenschutz",
-    "Discord Bot Richtlinien",
-    "Discord Bot Datenschutz",
+    "KyroX Policies",
+    "KyroX Terms of Use",
+    "KyroX Privacy",
+    "Discord Bot Policies",
+    "Discord Bot Privacy",
     "KyroX Premium",
     "KyroX Server Credits",
   ],
 
-  authors: [{ name: "KyroX", url: siteUrl }],
+  authors: [
+    {
+      name: "KyroX",
+      url: siteUrl,
+    },
+  ],
+
   creator: "KyroX",
   publisher: "KyroX",
 
   robots: {
     index: true,
     follow: true,
+
     googleBot: {
       index: true,
       follow: true,
@@ -64,7 +74,8 @@ export const metadata = {
   openGraph: {
     type: "website",
     url: "/",
-    locale: "de_DE",
+    locale: "en_US",
+    alternateLocale: ["de_DE"],
     siteName: "KyroX",
     title,
     description,
@@ -86,6 +97,9 @@ export const metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
   colorScheme: "dark",
   themeColor: "#070a10",
 };
