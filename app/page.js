@@ -225,6 +225,7 @@ export default function Page() {
   const desktopNavRef = useRef(null);
   const activeTocRef = useRef(null);
   const searchCloseTimerRef = useRef(null);
+  const navigationTimerRef = useRef(null);
 
   const openSearch = () => {
     window.clearTimeout(searchCloseTimerRef.current);
@@ -250,8 +251,17 @@ export default function Page() {
 
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
-    const q = searchQuery.toLowerCase();
-    return allItems.filter(it => t(it.title_de, it.title_en).toLowerCase().includes(q) || it.num.includes(q) || it.id.includes(q)).slice(0, 8);
+    const normalize = (value) => String(value)
+      .toLocaleLowerCase(lang === "de" ? "de-DE" : "en-US")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+    const q = normalize(searchQuery);
+
+    return allItems.filter(it => (
+      [it.title_de, it.title_en, it.num, it.id]
+        .some(value => normalize(value).includes(q))
+    )).slice(0, 12);
   }, [searchQuery, lang, allItems]);
 
   const activeData = useMemo(() => {
@@ -326,7 +336,10 @@ export default function Page() {
     return () => window.removeEventListener("keydown", onKey);
   }, [isSearchOpen, isSearchClosing]);
 
-  useEffect(() => () => window.clearTimeout(searchCloseTimerRef.current), []);
+  useEffect(() => () => {
+    window.clearTimeout(searchCloseTimerRef.current);
+    window.clearTimeout(navigationTimerRef.current);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = (isMobileMenuOpen || isSearchOpen) ? "hidden" : "";
@@ -335,11 +348,29 @@ export default function Page() {
 
   const handleTocClick = (e, id) => {
     e.preventDefault();
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     setActiveSection(id);
     setIsMobileMenuOpen(false);
     closeSearch();
     history.replaceState(null, "", `#${id}`);
+
+    // Mobile overlays lock body scrolling. Wait until they are closed before
+    // calculating the section position and starting the smooth scroll.
+    const overlayWasOpen = isSearchOpen || isMobileMenuOpen;
+    const navigationDelay = overlayWasOpen ? 300 : 0;
+
+    window.clearTimeout(navigationTimerRef.current);
+    navigationTimerRef.current = window.setTimeout(() => {
+      const target = document.getElementById(id);
+      if (!target) return;
+
+      const headerOffset = window.innerWidth < 1024 ? 76 : 24;
+      const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: Math.max(0, top),
+        behavior: "smooth",
+      });
+    }, navigationDelay);
   };
 
   const toggleCat = (k) => setOpenCats(p => ({ ...p, [k]: !p[k] }));
@@ -354,15 +385,18 @@ export default function Page() {
 
       {/* Global Search Palette (STRG+K) */}
       {isSearchOpen && (
-        <div className={`search-overlay ${isSearchClosing ? "search-overlay--closing" : ""} fixed inset-0 z-[90] bg-[#020806]/75 backdrop-blur-[14px] flex items-start justify-center p-4 pt-[12vh]`} onClick={closeSearch}>
-          <div className={`search-palette ${isSearchClosing ? "search-palette--closing" : ""} relative w-full max-w-[640px] bg-[#0B1516]/95 border border-emerald-400/15 rounded-[18px] shadow-[0_28px_100px_rgba(0,0,0,0.65),0_0_60px_rgba(16,185,129,0.10)] overflow-hidden`} onClick={e => e.stopPropagation()}>
+        <div className={`search-overlay ${isSearchClosing ? "search-overlay--closing" : ""} fixed inset-0 z-[90] bg-[#020806]/75 backdrop-blur-[14px] flex items-start justify-center p-3 pt-[calc(env(safe-area-inset-top)+72px)] md:p-4 md:pt-[12vh]`} onClick={closeSearch}>
+          <div className={`search-palette ${isSearchClosing ? "search-palette--closing" : ""} relative flex max-h-[calc(100dvh-88px)] w-full max-w-[640px] flex-col overflow-hidden rounded-[16px] border border-emerald-400/15 bg-[#0B1516]/95 shadow-[0_28px_100px_rgba(0,0,0,0.65),0_0_60px_rgba(16,185,129,0.10)] md:max-h-[76vh] md:rounded-[18px]`} onClick={e => e.stopPropagation()}>
             <div className="search-aura pointer-events-none absolute -top-24 left-1/2 h-44 w-80 -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl" />
-            <div className="search-input-row relative flex items-center gap-3 px-5 h-[64px] border-b border-emerald-300/10">
-              <Search size={20} className="search-icon text-[#2DD4BF]" />
-              <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={t("Richtlinien durchsuchen... z.B. Gift Code","Search policies... e.g. Gift Code")} className="search-input flex-1 bg-transparent outline-none text-[15px] text-[#F1F5F9] caret-[#2DD4BF] placeholder:text-[#718096]" />
+            <div className="search-input-row relative flex h-[60px] shrink-0 items-center gap-2.5 border-b border-emerald-300/10 px-3 md:h-[64px] md:gap-3 md:px-5">
+              <Search size={20} className="search-icon shrink-0 text-[#2DD4BF]" />
+              <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)} enterKeyHint="search" placeholder={t("Richtlinien durchsuchen...","Search policies...")} className="search-input min-w-0 flex-1 bg-transparent text-[16px] text-[#F1F5F9] caret-[#2DD4BF] outline-none placeholder:text-[#718096] md:text-[15px]" />
               <span className="hidden md:flex text-[10px] font-mono text-[#718096] border border-white/[0.07] rounded px-1.5 py-0.5">ESC</span>
+              <button type="button" onClick={closeSearch} aria-label={t("Suche schließen", "Close search")} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.07] bg-white/[0.04] text-[#718096] active:scale-95 md:hidden">
+                <X size={16} />
+              </button>
             </div>
-            <div className="max-h-[60vh] overflow-y-auto p-2">
+            <div className="sidebar-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
               {!searchQuery.trim() ? (
                 <div className="py-16 text-center">
                   <div className="w-12 h-12 rounded-full bg-[#141D2B] border border-white/[0.07] flex items-center justify-center mx-auto mb-4"><Search size={20} className="text-[#718096]" /></div>
@@ -370,13 +404,24 @@ export default function Page() {
                   <p className="text-[11px] text-[#718096] mt-2 font-mono">STRG + K</p>
                 </div>
               ) : searchResults.length === 0 ? (
-                <p className="text-center text-sm text-[#718096] py-10">{t("Keine Ergebnisse für","No results for")} "{searchQuery}"</p>
+                <div role="status" aria-live="polite" className="px-3 py-10 text-center md:py-12">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-amber-400/15 bg-amber-400/[0.07] text-amber-300">
+                    <Search size={20} />
+                  </div>
+                  <p className="text-sm font-semibold text-[#F1F5F9]">{t("Keine Ergebnisse gefunden", "No results found")}</p>
+                  <p className="mx-auto mt-2 max-w-[360px] break-words text-xs leading-relaxed text-[#718096]">
+                    {t("Für deine Suche wurde kein passender Abschnitt gefunden:", "No matching section was found for your search:")} <span className="font-medium text-[#A6B1C3]">“{searchQuery}”</span>
+                  </p>
+                  <button type="button" onClick={() => setSearchQuery("")} className="mt-5 min-h-11 rounded-[10px] border border-emerald-400/20 bg-emerald-400/[0.08] px-4 text-sm font-medium text-[#2DD4BF] transition-colors active:bg-emerald-400/[0.14] md:min-h-0 md:py-2">
+                    {t("Suche zurücksetzen", "Clear search")}
+                  </button>
+                </div>
               ) : (
                 <div className="space-y-1">
                   {searchResults.map((it, resultIndex) => {
                     const cat = TOC_CATEGORIES.find(c => c.items.some(x => x.id === it.id));
                     return (
-                      <button key={it.id} onClick={e => handleTocClick(e, it.id)} style={{ animationDelay: `${resultIndex * 38}ms` }} className="search-result-item w-full flex items-center gap-3 px-3 py-3 rounded-[11px] hover:bg-emerald-400/[0.07] text-left group transition-[transform,background-color] duration-150">
+                      <button key={it.id} onClick={e => handleTocClick(e, it.id)} style={{ animationDelay: `${resultIndex * 38}ms` }} className="search-result-item group flex min-h-14 w-full items-center gap-3 rounded-[11px] px-3 py-3 text-left transition-[transform,background-color] duration-150 active:bg-emerald-400/[0.10] md:min-h-0 md:hover:bg-emerald-400/[0.07]">
                         <span className="text-[11px] font-mono text-[#10B981] bg-[rgba(16, 185, 129,0.10)] border border-[rgba(16, 185, 129,0.20)] rounded px-1.5 py-0.5">{it.num}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-[#F1F5F9] group-hover:text-white truncate">{t(it.title_de, it.title_en)}</p>
