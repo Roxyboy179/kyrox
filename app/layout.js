@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = "https://kyrox-eight.vercel.app";
-const title = "KyroX – Discord Bot für deinen Server";
+const title = "Richtlinien & Rechtliches | KyroX";
 const description =
-  "Verwalte deinen Discord-Server mit KyroX: Moderation, Tickets, Automatisierungen, Backups, Premium-Funktionen und mehr.";
+  "Offizielle KyroX-Richtlinien zu Nutzung, Datenschutz, Moderation, Premium, Server Credits, Events und weiteren Bot-Funktionen.";
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
@@ -27,7 +27,7 @@ export const metadata = {
   },
   description,
   applicationName: "KyroX",
-  category: "technology",
+  category: "legal",
   referrer: "origin-when-cross-origin",
 
   alternates: {
@@ -36,13 +36,13 @@ export const metadata = {
 
   keywords: [
     "KyroX",
-    "Discord Bot",
-    "Discord Server",
-    "Discord Moderation",
-    "Discord Tickets",
-    "Discord Automatisierung",
-    "Discord Dashboard",
-    "Server Management",
+    "KyroX Richtlinien",
+    "KyroX Nutzungsbedingungen",
+    "KyroX Datenschutz",
+    "Discord Bot Richtlinien",
+    "Discord Bot Datenschutz",
+    "KyroX Premium",
+    "KyroX Server Credits",
   ],
 
   authors: [{ name: "KyroX", url: siteUrl }],
@@ -71,7 +71,7 @@ export const metadata = {
   },
 
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title,
     description,
   },
