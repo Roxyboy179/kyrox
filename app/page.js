@@ -194,6 +194,14 @@ const TOC_CATEGORIES = [
   ]}
 ];
 
+// The desktop and mobile layouts both render the policy sections. This helper
+// deliberately selects the visible copy so mobile navigation never targets
+// the hidden desktop section with the same id.
+function getVisibleSection(id) {
+  return Array.from(document.querySelectorAll(`section[id="${id}"]`))
+    .find(element => element.getClientRects().length > 0) || null;
+}
+
 function KyroXLogo() {
   return (
     <div className="flex items-center gap-2.5">
@@ -305,7 +313,7 @@ export default function Page() {
 
   useEffect(() => {
     const id = window.location.hash.slice(1);
-    const target = id ? document.getElementById(id) : null;
+    const target = id ? getVisibleSection(id) : null;
     if (!target) return;
 
     setActiveSection(id);
@@ -360,7 +368,7 @@ export default function Page() {
 
     window.clearTimeout(navigationTimerRef.current);
     navigationTimerRef.current = window.setTimeout(() => {
-      const target = document.getElementById(id);
+      const target = getVisibleSection(id);
       if (!target) return;
 
       const headerOffset = window.innerWidth < 1024 ? 76 : 24;
